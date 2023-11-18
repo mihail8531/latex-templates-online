@@ -1,9 +1,8 @@
-from typing import Callable, ParamSpec, TypeVar, Coroutine
-import os
-import shutil
 import asyncio
+import os
 from functools import wraps
 from subprocess import run
+from typing import Callable, Coroutine, ParamSpec, TypeVar, cast
 
 Param = ParamSpec("Param")
 RetType = TypeVar("RetType")
@@ -19,5 +18,4 @@ def to_async(
     return wrapper
 
 
-async_shutil_which = to_async(shutil.which)
 async_os_path_exists = to_async(os.path.exists)

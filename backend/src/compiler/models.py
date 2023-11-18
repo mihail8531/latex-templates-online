@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
+
 
 @dataclass
 class Source:

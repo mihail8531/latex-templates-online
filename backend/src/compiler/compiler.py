@@ -1,8 +1,8 @@
-from typing import Protocol, Sequence
 from enum import Enum
+from typing import Protocol, Sequence
 
 from .exceptions import CompilerWithGivenTypeNotFound
-from .models import Source, CompilationResult
+from .models import CompilationResult, Source
 
 
 class CompilerType(Enum):

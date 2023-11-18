@@ -2,8 +2,7 @@ from aiofiles import open
 import os
 from typing import Sequence, Any
 from abc import ABC, abstractmethod
-from utils import async_shutil_which
-import shutil
+import aioshutil
 import asyncio
 from ..compiler import Compiler, Source
 from ..exceptions import CompilerRequierementsNotSatisfied
@@ -32,7 +31,7 @@ class TexliveCompiler(Compiler, ABC):
 
     async def check_requirements(self) -> None:
         compiler_executable_name = await self._get_compiler_executable_name()
-        if await async_shutil_which(compiler_executable_name) is None:
+        if await aioshutil.which(compiler_executable_name) is None:
             raise CompilerRequierementsNotSatisfied(
                 f"Compiler executable name {compiler_executable_name} not found!"
             )
