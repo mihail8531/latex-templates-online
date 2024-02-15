@@ -1,0 +1,25 @@
+{% extends "_layout.html.jinja" %}
+{% block main_content %}
+<div class="container">
+    <div></div>
+    <div class="container-center">
+        <h1>Latex templates</h1>
+        <div id="content">
+            hello
+            {# {% if books|length %}
+                {% for book in books %}
+                <p>Title: {{ book.title }} Author: {{ book.author_name}}</p>
+                {% endfor %}
+            {% else %} #}
+                <p>Such empty...</p>
+            {# {% endif %} #}
+        </div>
+        <div >
+            {# {% include 'books/partials/show_add_form.html' %} #}
+        </div>
+    </div>
+    <div></div>
+
+</div>
+
+{% endblock %}
