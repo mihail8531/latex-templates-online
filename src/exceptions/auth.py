@@ -6,3 +6,9 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
+
+login_required_redirect = HTTPException(
+    status_code=status.HTTP_302_FOUND,
+    detail="Not authenticated",
+    headers={"Location": "/login"},
+)

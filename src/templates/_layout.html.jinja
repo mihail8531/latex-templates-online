@@ -17,15 +17,7 @@
 
 <body>
 
-    <nav>
-        <a class="navbar-brand" href="/">LuaLatex Compiler <i class="fas fa-code"></i></a>
-        <span>
-            <a class="nav-item" href="/authors">Authors <i class="fas fa-users"></i></a>
-            <a class="nav-item" href="/books">Books <i class="fas fa-book-reader"></i></a>
-        </span>
-
-
-    </nav>
+    <nav id="navbar" hx-trigger="load" hx-get="/partial/navbar"></nav>
 
     <div class="main_content">
         {% block main_content %}{% endblock %}

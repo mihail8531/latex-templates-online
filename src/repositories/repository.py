@@ -16,7 +16,7 @@ class Repository(Protocol[ModelT, IdT]):
 
     async def add(self, item: ModelT) -> None: ...
 
-    async def update(self, id: IdT, values: dict[str, Any]) -> None: ...
+    async def update(self, id: IdT, items: dict[str, Any]) -> None: ...
 
     async def delete(self, id: IdT) -> None: ...
 
@@ -27,15 +27,6 @@ class AlchemyRepository(Repository[AlchemyModelT, IdT]):
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
-
-    async def get(self, id: IdT) -> AlchemyModelT | None:
-        raise NotImplementedError()
-
-    async def update(self, id: IdT, values: dict[str, Any]) -> None:
-        raise NotImplementedError()
-
-    async def delete(self, id: IdT) -> None:
-        raise NotImplementedError()
 
     async def get_all(self) -> list[AlchemyModelT]:
         stmt = select(self.alchemy_model)
@@ -59,11 +50,11 @@ class AlchemyIdRepository(AlchemyRepository[IdModelT, IdT]):
         self.session.add_all(items)
         await self.session.flush()
 
-    async def update(self, id: IdT, values: dict[str, Any]) -> None:
+    async def update(self, id: IdT, items: dict[str, Any]) -> None:
         stmt = (
             update(self.alchemy_model)
             .where(self.alchemy_model.id == id)
-            .values(**values)
+            .values(**items)
         )
         await self.session.execute(stmt)
 

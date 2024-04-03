@@ -3,7 +3,7 @@ from exceptions.utils import with_errors
 from exceptions.auth import credentials_exception
 from schemas.auth import Token
 from services.auth import AuthService, InvalidPasswordError
-from services.dependencies import get_auth_service
+from dependencies.user import get_auth_service
 from .forms import PasswordRequestForm
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])

@@ -1,22 +1,32 @@
-from sqlalchemy import ForeignKey
-from .base import BaseIdModel
+from sqlalchemy import ForeignKey, Table, Column
+from .base import BaseIdModel, Base
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from datetime import datetime
 from sqlalchemy.sql.functions import now
 from sqlalchemy.sql.expression import false
 
 
+user_workspace = Table(
+    "user_workspace",
+    Base.metadata,
+    Column("user_id", ForeignKey("user.id"), primary_key=True),
+    Column("workspace_id", ForeignKey("workspace.id"), primary_key=True),
+)
+
 class Workspace(BaseIdModel):
     __tablename__ = "workspace"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    creator_id: Mapped[int] = mapped_column("User.id")
-    admin_id: Mapped[int] = mapped_column("User.id")
+    creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    admin_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     name: Mapped[str]
     description: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
     deleted: Mapped[bool] = mapped_column(server_default=false())
 
+    creator: Mapped["User"] = relationship(foreign_keys=[creator_id])
+    admin: Mapped["User"] = relationship(foreign_keys=[admin_id])
+    users: Mapped[list["User"]] = relationship(secondary=user_workspace, back_populates="workspaces")
 
 class User(BaseIdModel):
     __tablename__ = "user"
@@ -31,7 +41,7 @@ class User(BaseIdModel):
     password_hash: Mapped[str]
     deleted: Mapped[bool] = mapped_column(server_default=false())
 
-    workspaces: Mapped[list[Workspace]] = relationship()
+    workspaces: Mapped[list[Workspace]] = relationship(secondary=user_workspace, back_populates="users")
 
 
 class Template(BaseIdModel):
