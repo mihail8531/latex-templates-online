@@ -62,9 +62,3 @@ Password: TypeAlias = Annotated[
     SecretStr, Field(min_length=8), get_password_validator()
 ]
 
-
-class TestModel(BaseModel):
-    password: Password
-
-
-TestModel(password=SecretStr("12345678"))

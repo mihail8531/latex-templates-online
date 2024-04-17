@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from schemas.fields import Login, Password, ShortStr
 
@@ -15,8 +15,7 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     login: Login
-    display_name: ShortStr
-    name: ShortStr
-    surname: ShortStr
-    patronymic: ShortStr
     password: Password
+    email: EmailStr
+    name: ShortStr
+    display_name: ShortStr

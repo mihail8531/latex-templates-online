@@ -11,7 +11,15 @@ templates = Jinja2Templates(settings.TEMPLATES_PATH)
 
 
 class TemplateResponse(Protocol):
-    def __call__(self, name: str, data: dict[str, Any] | None = ...) -> Response: ...
+    def __call__(
+        self,
+        name: str,
+        data: dict[str, Any] | None = ...,
+        status_code: int = ...,
+        headers: Mapping[str, str] | None = ...,
+        media_type: str | None = ...,
+        background: BackgroundTask | None = ...,
+    ) -> Response: ...
 
 
 def get_template_response(

@@ -34,9 +34,6 @@ class User(BaseIdModel):
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str]
     display_name: Mapped[str]
-    name: Mapped[str | None]
-    surname: Mapped[str | None]
-    patronymic: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
     password_hash: Mapped[str]
     deleted: Mapped[bool] = mapped_column(server_default=false())

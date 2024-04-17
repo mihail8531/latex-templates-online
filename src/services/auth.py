@@ -20,6 +20,9 @@ class InvalidPasswordError(AuthServiceError):
 class InvalidTokenError(AuthServiceError):
     pass
 
+class TokenNotProvided(AuthServiceError):
+    pass
+
 
 class AuthService:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -50,7 +53,9 @@ class AuthService:
             raise InvalidPasswordError()
         return user
 
-    async def get_authenticated_user_by_token(self, token: str) -> User:
+    async def get_authenticated_user_by_token(self, token: str | None) -> User:
+        if token is None:
+            raise TokenNotProvided()
         try:
             token_payload = jwt.decode(
                 token, self._jwt_secret_key, algorithms=[self._jwt_algorithm]
