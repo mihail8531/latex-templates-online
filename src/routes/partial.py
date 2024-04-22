@@ -22,7 +22,7 @@ async def get_content(
 async def get_register_form(
     template_response: TemplateResponse = Depends(get_template_response),
 ) -> Response:
-    return template_response("register_form.html")
+    return template_response("register_form.jinja")
 
 
 @partial_router.get("/login_form")

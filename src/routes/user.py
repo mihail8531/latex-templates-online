@@ -1,9 +1,11 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Response, Form
 
+from dependencies.template import TemplateResponse, get_template_response
 from dependencies.user import get_user_service
 from services.user import UserService
 from schemas.user import UserCreate
+from pydantic import ValidationError
 
 user_router = APIRouter(prefix="/user")
 
@@ -34,16 +36,21 @@ user_router = APIRouter(prefix="/user")
 #         raise user_already_exists
 #     return UserSchema.model_validate(user, from_attributes=True)
 
-
+from warnings import warn
 @user_router.post("/create")
 async def create_user(
-    login: str = Form(),
-    password: str = Form(),
-    display_name: str | None = Form(),
-    email: str | None = Form(),
-    user_service: UserService = Depends(get_user_service)
+    login: str | None = Form(default=None),
+    password: str | None = Form(default=None),
+    display_name: str | None = Form(default=None),
+    email: str | None = Form(default=None),
+    user_service: UserService = Depends(get_user_service),
+    template_response: TemplateResponse = Depends(get_template_response)
 ) -> Response:
+    warn(password)
     try:
-        create_schema = UserCreate(login=login, display_name=display_name, password=password)
-    user_service.create()
+        create_schema = UserCreate(login=login, password=password, email=email, display_name=display_name)
+    except ValidationError as e:
+        warn(e.errors()[0]["msg"])
+        return template_response("register_form.jinja", data={"error_msgs": e.errors()[0]["msg"].split('\n')})
+    # user_service.create()
     

@@ -1,8 +1,0 @@
-<form class="register-form" hx-post="/user/create">
-    <input name="name" type="text" placeholder="name" />
-    <input name="password" type="password" placeholder="password" />
-    <input name="email" type="text" placeholder="email address" />
-    <button type="submit">Submit</button>
-    <p class="message">Already registered? <a href="" hx-trigger="click" hx-target=".register-form"
-            hx-get="/partial/login_form" hx-swap="outerHTML">Sign In</a></p>
-</form>
