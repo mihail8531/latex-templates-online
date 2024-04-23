@@ -1,17 +1,15 @@
 BEGIN;
 CREATE TABLE "user"(
-    "id" int PRIMARY KEY,
+    "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "login" varchar UNIQUE NOT NULL,
     "display_name" varchar NOT NULL,
-    "name" varchar,
-    "surname" varchar,
-    "patronymic" varchar,
+    "email" varchar NOT NULL,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
     "password_hash" varchar NOT NULL,
     "deleted" bool NOT NULL DEFAULT FALSE
 );
 CREATE TABLE "template"(
-    "id" int PRIMARY KEY,
+    "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "author_id" int NOT NULL,
     "workspace_id" int NOT NULL,
     "name" varchar NOT NULL,
@@ -23,7 +21,7 @@ CREATE TABLE "template"(
     "deleted" bool NOT NULL DEFAULT FALSE
 );
 CREATE TABLE "tickets_set"(
-    "id" int PRIMARY KEY,
+    "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "author_id" int NOT NULL,
     "template_id" int NOT NULL,
     "name" varchar NOT NULL,
@@ -34,7 +32,7 @@ CREATE TABLE "tickets_set"(
     "deleted" bool NOT NULL DEFAULT FALSE
 );
 CREATE TABLE "workspace"(
-    "id" int PRIMARY KEY,
+    "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "creator_id" int NOT NULL,
     "admin_id" int NOT NULL,
     "name" varchar NOT NULL,

@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 
-class UserRepository(AlchemyIdRepository[User, int]):
+class WorkspaceRepository(AlchemyIdRepository[User, int]):
     alchemy_model = User
 
     async def get_by_login(self, login: str) -> User | None:

@@ -3,7 +3,6 @@ from warnings import warn
 from functools import partial
 from typing import Annotated, TypeAlias
 from pydantic import AfterValidator, BaseModel, Field, EmailStr, StringConstraints
-from .pretty_errors import CustomErrorMsg, merge_override, merge_override_prev
 import string
 from pydantic import SecretStr
 
@@ -14,16 +13,11 @@ DISPLAY_NAME_MIN_LENGTH = 3
 ShortStr: TypeAlias = Annotated[
     str,
     Field(max_length=SHORT_STR_MAX_LENGTH),
-    CustomErrorMsg(
-        f"Слишком много символов (должно быть не больше {SHORT_STR_MAX_LENGTH})"
-    ),
 ]
 Login: TypeAlias = Annotated[
     ShortStr,
     StringConstraints(strip_whitespace=True, pattern="[a-zA-Z0-9_]+"),
-    CustomErrorMsg(
-        "Логин может содержать только латинские символы, цифры и нижнее подчеркивание"
-    ),
+    Field(examples=["login"])
 ]
 
 digits = set(string.digits)
@@ -80,25 +74,18 @@ def get_password_validator(
 Password: TypeAlias = Annotated[
     SecretStr,
     Field(min_length=PASSWORD_MIN_LENGTH),
-    CustomErrorMsg(
-        f"Пароль должен состоять из не менее {PASSWORD_MIN_LENGTH} символов",
-        merge_strategy=merge_override_prev,
-    ),
     get_password_validator(),
 ]
 
 
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
     login: Login
+    email: EmailStr
+    display_name: Annotated[str, Field(min_length=DISPLAY_NAME_MIN_LENGTH)]
+
+
+class UserCreate(UserBase):
     password: Password
-    email: Annotated[
-        EmailStr, CustomErrorMsg("Некорректный email", merge_strategy=merge_override)
-    ]
-    display_name: Annotated[
-        str, Field(min_length=DISPLAY_NAME_MIN_LENGTH), CustomErrorMsg("")
-    ]
-    # display_name: Annotated[
-    #     Field(min_length=3),
-    #     CustomErrorMsg("Отображаемое имя должно быть не менее"),
-    #     ShortStr,
-    # ]
+
+class UserSchema(UserBase):
+    pass

@@ -6,7 +6,7 @@ from schemas.auth import Token
 
 import settings
 from models.public import User
-from services.user import UserService
+from services.user import UserService, UserNotFoundError
 
 
 class AuthServiceError(Exception):
@@ -23,6 +23,8 @@ class InvalidTokenError(AuthServiceError):
 class TokenNotProvided(AuthServiceError):
     pass
 
+class InvalidUsernameError(AuthServiceError):
+    pass
 
 class AuthService:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -48,7 +50,10 @@ class AuthService:
         return self.pwd_context.hash(plain_password)
 
     async def get_authenticated_user(self, login: str, password: str) -> User:
-        user = await self._user_service.get_by_login(login)
+        try:
+            user = await self._user_service.get_by_login(login)
+        except UserNotFoundError:
+            raise InvalidUsernameError()
         if not self.verify_password(password, user.password_hash):
             raise InvalidPasswordError()
         return user

@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey, Table, Column
 from .base import BaseIdModel, Base
 from sqlalchemy.orm import Mapped, relationship, mapped_column
+from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 from sqlalchemy.sql.functions import now
 from sqlalchemy.sql.expression import false
@@ -33,6 +34,7 @@ class User(BaseIdModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     login: Mapped[str]
+    email: Mapped[str]
     display_name: Mapped[str]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
     password_hash: Mapped[str]

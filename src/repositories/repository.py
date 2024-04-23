@@ -58,9 +58,15 @@ class AlchemyIdRepository(AlchemyRepository[IdModelT, IdT]):
         )
         await self.session.execute(stmt)
 
-    async def delete(self, id: IdT) -> None:
+    async def delete_forever(self, id: IdT) -> None:
         stmt = delete(self.alchemy_model).where(self.alchemy_model.id == id)
         await self.session.execute(stmt)
+    
+    async def delete(self, id: IdT) -> None:
+        await self.update(id, items={"deleted": True})
+    
+    async def restore(self, id: IdT) -> None:
+        await self.update(id, items={"deleted": False})
 
     async def exists(self, id: IdT) -> bool:
         stmt = select(self.alchemy_model.id).where(self.alchemy_model.id == id)
