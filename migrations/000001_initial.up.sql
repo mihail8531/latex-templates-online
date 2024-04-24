@@ -5,8 +5,7 @@ CREATE TABLE "user"(
     "display_name" varchar NOT NULL,
     "email" varchar NOT NULL,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "password_hash" varchar NOT NULL,
-    "deleted" bool NOT NULL DEFAULT FALSE
+    "password_hash" varchar NOT NULL
 );
 CREATE TABLE "template"(
     "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -17,8 +16,7 @@ CREATE TABLE "template"(
     "latex" text,
     "lua_example" text,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "edit_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "deleted" bool NOT NULL DEFAULT FALSE
+    "edit_timestamp" timestamp NOT NULL DEFAULT (now())
 );
 CREATE TABLE "tickets_set"(
     "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -28,8 +26,7 @@ CREATE TABLE "tickets_set"(
     "description" text,
     "lua" text,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "edit_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "deleted" bool NOT NULL DEFAULT FALSE
+    "edit_timestamp" timestamp NOT NULL DEFAULT (now())
 );
 CREATE TABLE "workspace"(
     "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -37,8 +34,7 @@ CREATE TABLE "workspace"(
     "admin_id" int NOT NULL,
     "name" varchar NOT NULL,
     "description" text,
-    "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "deleted" bool NOT NULL DEFAULT FALSE
+    "creation_timestamp" timestamp NOT NULL DEFAULT (now())
 );
 ALTER TABLE "template"
     ADD FOREIGN KEY ("author_id") REFERENCES "user"("id");

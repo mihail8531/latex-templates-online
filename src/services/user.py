@@ -1,4 +1,4 @@
-from models.public import User
+from models import public
 from repositories.user import UserRepository
 from schemas.user import UserCreate
 
@@ -22,22 +22,22 @@ class UserService:
     ) -> None:
         self._user_repository = user_repository
 
-    async def get_by_login(self, login: str) -> User:
+    async def get_by_login(self, login: str) -> public.User:
         user = await self._user_repository.get_by_login(login)
         if user is None:
             raise UserNotFoundError(f"User with given login ({login}) not found")
         return user
 
-    async def get_by_id(self, id: int) -> User:
+    async def get_by_id(self, id: int) -> public.User:
         user = await self._user_repository.get(id)
         if user is None:
             raise UserNotFoundError(f"User with given id ({id}) not found")
         return user
 
-    async def create(self, user_create_schema: UserCreate, password_hash: str) -> User:
+    async def create(self, user_create_schema: UserCreate, password_hash: str) -> public.User:
         if await self._user_repository.exits_with_login(user_create_schema.login):
             raise UserAlreadyExistsError()
-        user = User(
+        user = public.User(
             **user_create_schema.model_dump(exclude={"password"}),
             password_hash=password_hash,
         )
@@ -45,4 +45,4 @@ class UserService:
         return user
     
     async def delete(self, user_id: int) -> None:
-        await self._user_repository.update(user_id, {"deleted": True})
+        await self._user_repository.delete(user_id)

@@ -7,7 +7,7 @@ from sqlalchemy.sql.functions import now
 from sqlalchemy.sql.expression import false
 
 
-user_workspace = Table(
+UserWorkspace = Table(
     "user_workspace",
     Base.metadata,
     Column("user_id", ForeignKey("user.id"), primary_key=True),
@@ -23,11 +23,10 @@ class Workspace(BaseIdModel):
     name: Mapped[str]
     description: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
-    deleted: Mapped[bool] = mapped_column(server_default=false())
 
     creator: Mapped["User"] = relationship(foreign_keys=[creator_id])
     admin: Mapped["User"] = relationship(foreign_keys=[admin_id])
-    users: Mapped[list["User"]] = relationship(secondary=user_workspace, back_populates="workspaces")
+    users: Mapped[list["User"]] = relationship(secondary=UserWorkspace, back_populates="workspaces")
 
 class User(BaseIdModel):
     __tablename__ = "user"
@@ -38,9 +37,8 @@ class User(BaseIdModel):
     display_name: Mapped[str]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
     password_hash: Mapped[str]
-    deleted: Mapped[bool] = mapped_column(server_default=false())
 
-    workspaces: Mapped[list[Workspace]] = relationship(secondary=user_workspace, back_populates="users")
+    workspaces: Mapped[list[Workspace]] = relationship(secondary=UserWorkspace, back_populates="users")
 
 
 class Template(BaseIdModel):
@@ -55,7 +53,6 @@ class Template(BaseIdModel):
     lua_example: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
     edit_timestamp: Mapped[datetime] = mapped_column(server_default=now())
-    deleted: Mapped[bool] = mapped_column(server_default=false())
 
 
 class TicketsSet(BaseIdModel):

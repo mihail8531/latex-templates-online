@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from schemas.auth import Token
 
 import settings
-from models.public import User
+from models import public
 from services.user import UserService, UserNotFoundError
 
 
@@ -20,11 +20,14 @@ class InvalidPasswordError(AuthServiceError):
 class InvalidTokenError(AuthServiceError):
     pass
 
+
 class TokenNotProvided(AuthServiceError):
     pass
 
+
 class InvalidUsernameError(AuthServiceError):
     pass
+
 
 class AuthService:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -49,7 +52,7 @@ class AuthService:
     def get_password_hash(self, plain_password: str) -> str:
         return self.pwd_context.hash(plain_password)
 
-    async def get_authenticated_user(self, login: str, password: str) -> User:
+    async def get_authenticated_user(self, login: str, password: str) -> public.User:
         try:
             user = await self._user_service.get_by_login(login)
         except UserNotFoundError:
@@ -58,7 +61,7 @@ class AuthService:
             raise InvalidPasswordError()
         return user
 
-    async def get_authenticated_user_by_token(self, token: str | None) -> User:
+    async def get_authenticated_user_by_token(self, token: str | None) -> public.User:
         if token is None:
             raise TokenNotProvided()
         try:

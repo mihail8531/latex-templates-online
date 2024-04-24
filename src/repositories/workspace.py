@@ -1,16 +1,14 @@
 from .repository import AlchemyIdRepository
-from models.public import User
+from models.public import User, Workspace, UserWorkspace
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 
-class WorkspaceRepository(AlchemyIdRepository[User, int]):
-    alchemy_model = User
+class WorkspaceRepository(AlchemyIdRepository[Workspace, int]):
+    alchemy_model = Workspace
 
-    async def get_by_login(self, login: str) -> User | None:
-        stmt = select(User).where(User.login == login).options(joinedload(User.workspaces))
-        return (await self.session.execute(stmt)).unique().scalar_one_or_none()
-
-    async def exits_with_login(self, login: str) -> bool:
-        stmt = select(User.id).where(User.login == login)
-        return (await self.session.execute(stmt)).scalar_one_or_none() is not None
+    async def get_all_by_participant_id(self, user_id: int) -> list[Workspace]:
+        stmt = select(Workspace).join(
+            UserWorkspace, onclause=(UserWorkspace.user_id == user_id)  # type: ignore[attr-defined]
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
