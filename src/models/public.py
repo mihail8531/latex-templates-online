@@ -1,3 +1,4 @@
+from typing import Callable, TypeAlias, cast
 from sqlalchemy import ForeignKey, Table, Column
 from .base import BaseIdModel, Base
 from sqlalchemy.orm import Mapped, relationship, mapped_column
@@ -7,12 +8,13 @@ from sqlalchemy.sql.functions import now
 from sqlalchemy.sql.expression import false
 
 
-UserWorkspace = Table(
+user_workspace = Table(
     "user_workspace",
     Base.metadata,
     Column("user_id", ForeignKey("user.id"), primary_key=True),
     Column("workspace_id", ForeignKey("workspace.id"), primary_key=True),
 )
+
 
 class Workspace(BaseIdModel):
     __tablename__ = "workspace"
@@ -26,7 +28,11 @@ class Workspace(BaseIdModel):
 
     creator: Mapped["User"] = relationship(foreign_keys=[creator_id])
     admin: Mapped["User"] = relationship(foreign_keys=[admin_id])
-    users: Mapped[list["User"]] = relationship(secondary=UserWorkspace, back_populates="workspaces")
+    users: Mapped[list["User"]] = relationship(
+        secondary=user_workspace, back_populates="workspaces"
+    )
+    templates: Mapped[list["Template"]] = relationship()
+
 
 class User(BaseIdModel):
     __tablename__ = "user"
@@ -38,7 +44,9 @@ class User(BaseIdModel):
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
     password_hash: Mapped[str]
 
-    workspaces: Mapped[list[Workspace]] = relationship(secondary=UserWorkspace, back_populates="users")
+    workspaces: Mapped[list[Workspace]] = relationship(
+        secondary=user_workspace, back_populates="users"
+    )
 
 
 class Template(BaseIdModel):
@@ -52,7 +60,9 @@ class Template(BaseIdModel):
     latex: Mapped[str | None]
     lua_example: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
-    edit_timestamp: Mapped[datetime] = mapped_column(server_default=now())
+
+    workspace: Mapped[Workspace] = relationship(back_populates="templates")
+    tickets_sets: Mapped[list["TicketsSet"]] = relationship()
 
 
 class TicketsSet(BaseIdModel):
@@ -65,5 +75,6 @@ class TicketsSet(BaseIdModel):
     description: Mapped[str | None]
     lua: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
-    edit_timestamp: Mapped[datetime] = mapped_column(server_default=now())
-    deleted: Mapped[bool] = mapped_column(server_default=false())
+
+    author: Mapped[User] = relationship()
+    template: Mapped[Template] = relationship(back_populates="tickets_sets")

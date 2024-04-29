@@ -1,12 +1,12 @@
 from pydantic import BaseModel
-from schemas.user import User
+from schemas.user import UserHeader, UserHeader
 from datetime import datetime
+from .template import TemplateHeader
 
 
 class WorkspaceBase(BaseModel):
     name: str
     description: str
-    creation_timestamp: datetime
 
 
 class WorkspaceCreate(WorkspaceBase):
@@ -15,9 +15,11 @@ class WorkspaceCreate(WorkspaceBase):
 
 class WorkspaceHeader(WorkspaceBase):
     id: int
+    creation_timestamp: datetime
 
 
 class Workspace(WorkspaceHeader):
-    creator: User
-    admin: User
-    users: list[User]
+    creator: UserHeader
+    admin: UserHeader
+    users: list[UserHeader]
+    templates: list[TemplateHeader]

@@ -15,8 +15,7 @@ CREATE TABLE "template"(
     "description" text,
     "latex" text,
     "lua_example" text,
-    "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "edit_timestamp" timestamp NOT NULL DEFAULT (now())
+    "creation_timestamp" timestamp NOT NULL DEFAULT (now())
 );
 CREATE TABLE "tickets_set"(
     "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -26,7 +25,7 @@ CREATE TABLE "tickets_set"(
     "description" text,
     "lua" text,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "edit_timestamp" timestamp NOT NULL DEFAULT (now())
+    "status" text NOT NULL
 );
 CREATE TABLE "workspace"(
     "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -37,25 +36,25 @@ CREATE TABLE "workspace"(
     "creation_timestamp" timestamp NOT NULL DEFAULT (now())
 );
 ALTER TABLE "template"
-    ADD FOREIGN KEY ("author_id") REFERENCES "user"("id");
+    ADD FOREIGN KEY ("author_id") REFERENCES "user"("id") ON DELETE SET NULL;
 ALTER TABLE "template"
-    ADD FOREIGN KEY ("workspace_id") REFERENCES "workspace"("id");
+    ADD FOREIGN KEY ("workspace_id") REFERENCES "workspace"("id") ON DELETE CASCADE;
 ALTER TABLE "tickets_set"
-    ADD FOREIGN KEY ("author_id") REFERENCES "user"("id");
+    ADD FOREIGN KEY ("author_id") REFERENCES "user"("id") ON DELETE SET NULL;
 ALTER TABLE "tickets_set"
-    ADD FOREIGN KEY ("template_id") REFERENCES "template"("id");
+    ADD FOREIGN KEY ("template_id") REFERENCES "template"("id") ON DELETE CASCADE;
 ALTER TABLE "workspace"
-    ADD FOREIGN KEY ("creator_id") REFERENCES "user"("id");
+    ADD FOREIGN KEY ("creator_id") REFERENCES "user"("id") ON DELETE SET NULL;
 ALTER TABLE "workspace"
-    ADD FOREIGN KEY ("admin_id") REFERENCES "user"("id");
+    ADD FOREIGN KEY ("admin_id") REFERENCES "user"("id") ON DELETE SET NULL;
 CREATE TABLE "user_workspace"(
     "user_id" int,
     "workspace_id" int,
     PRIMARY KEY ("user_id", "workspace_id")
 );
 ALTER TABLE "user_workspace"
-    ADD FOREIGN KEY ("user_id") REFERENCES "user"("id");
+    ADD FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE;
 ALTER TABLE "user_workspace"
-    ADD FOREIGN KEY ("workspace_id") REFERENCES "workspace"("id");
+    ADD FOREIGN KEY ("workspace_id") REFERENCES "workspace"("id") ON DELETE CASCADE;
 COMMIT;
 

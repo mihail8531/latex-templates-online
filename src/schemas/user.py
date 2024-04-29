@@ -87,5 +87,5 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: Password
 
-class User(UserBase):
+class UserHeader(UserBase):
     id: int

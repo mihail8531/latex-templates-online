@@ -34,7 +34,9 @@ class UserService:
             raise UserNotFoundError(f"User with given id ({id}) not found")
         return user
 
-    async def create(self, user_create_schema: UserCreate, password_hash: str) -> public.User:
+    async def create(
+        self, user_create_schema: UserCreate, password_hash: str
+    ) -> public.User:
         if await self._user_repository.exits_with_login(user_create_schema.login):
             raise UserAlreadyExistsError()
         user = public.User(
@@ -43,6 +45,6 @@ class UserService:
         )
         await self._user_repository.add(user)
         return user
-    
+
     async def delete(self, user_id: int) -> None:
         await self._user_repository.delete(user_id)

@@ -7,7 +7,7 @@ from settings import settings
 engine = create_async_engine(
     settings.DB_URL, connect_args={"application_name": "latex-templates-rest"}
 )
-SessionMaker = async_sessionmaker(engine, expire_on_commit=False)
+SessionMaker = async_sessionmaker(engine, expire_on_commit=True)
 
 
 async def wrapped_session_maker() -> AsyncGenerator[AsyncSession, None]:

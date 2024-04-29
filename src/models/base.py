@@ -1,9 +1,9 @@
-from typing import Any, TypeVar
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
+from typing import Any
+from sqlalchemy.orm import DeclarativeBase, Mapped
+from sqlalchemy.ext.asyncio import AsyncAttrs
 
 
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     __abstract__ = True
 
 
