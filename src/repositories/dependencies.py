@@ -5,7 +5,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.session import get_session
-from .repository import AlchemyIdRepository
+from .alchemy import AlchemyIdRepository
 
 AlchemyRepositoryT = TypeVar("AlchemyRepositoryT", bound=AlchemyIdRepository)
 

@@ -1,5 +1,5 @@
-from .repository import AlchemyIdRepository
-from models.public import User, Workspace, user_workspace
+from .alchemy import AlchemyIdRepository
+from models.public import Template, User, Workspace, user_workspace
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
@@ -36,3 +36,6 @@ class WorkspaceRepository(AlchemyIdRepository[Workspace, int]):
         (await workspace.awaitable_attrs.users).remove(user)
         await self.session.flush()
         await self.session.refresh(workspace)
+    
+    async def get_templates(self, workspace: Workspace) -> list[Template]:
+        return await workspace.awaitable_attrs.templates

@@ -1,4 +1,4 @@
-from .repository import AlchemyIdRepository
+from .alchemy import AlchemyIdRepository
 from models.public import User, Workspace
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload

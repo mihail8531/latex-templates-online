@@ -131,8 +131,11 @@ async def delete_template(
 
 @workspace_router.put("/{workspace_id}/template/{template_id}")
 async def update_template(
+    template_create: TemplateCreate, 
     user: public.User = Depends(get_template_author_or_admin),
     template: public.Template = Depends(get_template),
     template_service: TemplateService = Depends(get_template_service),
 ) -> TemplateHeader:
-    pass  # TODO
+    await template_service.update_template(template, template_create)
+    return template
+    

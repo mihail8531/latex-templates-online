@@ -49,3 +49,8 @@ class TemplateService:
         self, template: public.Template, user: public.User
     ) -> bool:
         return template.author_id == user.id
+
+    async def update_template(
+        self, template: public.Template, template_create: TemplateCreate
+    ) -> None:
+        await self._template_repository.update(template, template_create.model_dump())
