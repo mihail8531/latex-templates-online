@@ -13,6 +13,7 @@ from dependencies.workspace import (
 )
 from models import public
 from schemas.template import TemplateCreate, TemplateHeader, Template
+from schemas.tickets_set import TicketsSetCreate
 from schemas.workspace import Workspace, WorkspaceBase, WorkspaceCreate, WorkspaceHeader
 from services.template import TemplateService
 from services.user import UserNotFoundError, UserService
@@ -137,5 +138,13 @@ async def update_template(
     template_service: TemplateService = Depends(get_template_service),
 ) -> TemplateHeader:
     await template_service.update_template(template, template_create)
-    return template
+    return TemplateHeader.model_validate(template, from_attributes=True)
+
+@workspace_router.post("/{workspace_id}/template/{template_id}/tickets_set")
+async def create_tickets_set(
+    tickets_set_create: TicketsSetCreate,
+    user: public.User = Depends(get_logged_user_in_workspace),
+    template: public.Template = Depends(get_template),
+    tickets_set_service = Depends(get_tickets_set_service)
+)
     

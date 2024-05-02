@@ -9,14 +9,27 @@ class DBSettings(BaseSettings):
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
+    DB_APP_NAME: str
 
     @property
     def DB_URL(self) -> str:
-        return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return "postgresql+psycopg://{user}:{password}@{host}:{port}/{db}?application_name={app}".format(
+            user=self.DB_USER,
+            password=self.DB_PASSWORD,
+            host=self.DB_HOST,
+            port=self.DB_PORT,
+            db=self.DB_NAME,
+            app=self.DB_APP_NAME,
+        )
 
 
 class S3Settings(BaseSettings):
-    pass
+    BUCKET_NAME: str
+    URL_EXPIRES_TIME: int
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_SESSION_TOKEN: str | None = None
+    REGION_NAME: str | None
 
 
 class AuthSettings(BaseSettings):

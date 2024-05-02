@@ -24,8 +24,8 @@ CREATE TABLE "tickets_set"(
     "name" varchar NOT NULL,
     "description" text,
     "lua" text,
-    "creation_timestamp" timestamp NOT NULL DEFAULT (now()),
-    "status" text NOT NULL
+    "log" text,
+    "creation_timestamp" timestamp NOT NULL DEFAULT (now())
 );
 CREATE TABLE "workspace"(
     "id" int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

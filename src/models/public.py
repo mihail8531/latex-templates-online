@@ -78,3 +78,7 @@ class TicketsSet(BaseIdModel):
 
     author: Mapped[User] = relationship()
     template: Mapped[Template] = relationship(back_populates="tickets_sets")
+
+    @property
+    def s3_id(self) -> str:
+        return f"{self.author_id}/{self.id}"
