@@ -3,7 +3,7 @@ from io import StringIO
 
 import pytest
 
-from compiler import Compiler, CompilersStorage, LuaLatexCompiler, Source #type: ignore[import-not-found]
+from services.compiler import Compiler, CompilersStorage, LuaLatexCompiler, Source #type: ignore[import-not-found]
 
 
 @pytest.mark.asyncio

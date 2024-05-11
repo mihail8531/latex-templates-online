@@ -6,6 +6,6 @@ class MainTexNotFound(CompilerException):
         super().__init__("main.tex file not found!")
 
 
-class CompilationFailed(CompilerException):
+class CompilationFailedError(CompilerException):
     def __init__(self, err: str) -> None:
         super().__init__(f"Compilation failed with error: {err}")

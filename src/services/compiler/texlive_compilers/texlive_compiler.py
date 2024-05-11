@@ -1,6 +1,8 @@
+from io import BytesIO, StringIO, TextIOWrapper
+import warnings
 from aiofiles import open
 import os
-from typing import Sequence, Any
+from typing import IO, Sequence, Any
 from abc import ABC, abstractmethod
 import aioshutil
 import asyncio
@@ -8,14 +10,14 @@ from ..compiler import Compiler, Source
 from ..exceptions import CompilerRequierementsNotSatisfied
 
 
-
 class TexliveCompiler(Compiler, ABC):
 
     @abstractmethod
-    async def _get_compiler_executable_name(self) -> str:
-        ...
+    async def _get_compiler_executable_name(self) -> str: ...
 
-    async def _prepare_enviroment(self, sources: Sequence[Source], directory: str) -> str | None:
+    async def _prepare_environment(
+        self, sources: Sequence[Source], directory: str
+    ) -> str | None:
         """
         saves source files to given directory
         returns main.tex file path or None if main.tex file not found
@@ -25,8 +27,8 @@ class TexliveCompiler(Compiler, ABC):
             path = os.path.join(directory, source.filename)
             if source.filename.lower() == "main.tex":
                 main_tex_path = path
-            async with open(path, "w") as f:
-                await f.write(source.source_file.read())
+            async with open(path, "wb") as f:
+                await f.write(source.file.read())
         return main_tex_path
 
     async def check_requirements(self) -> None:

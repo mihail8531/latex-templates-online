@@ -19,7 +19,7 @@ user_workspace = Table(
 class Workspace(BaseIdModel):
     __tablename__ = "workspace"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     creator_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     admin_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     name: Mapped[str]
@@ -37,7 +37,7 @@ class Workspace(BaseIdModel):
 class User(BaseIdModel):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     login: Mapped[str]
     email: Mapped[str]
     display_name: Mapped[str]
@@ -52,7 +52,7 @@ class User(BaseIdModel):
 class Template(BaseIdModel):
     __tablename__ = "template"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     author_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     workspace_id: Mapped[int] = mapped_column(ForeignKey(Workspace.id))
     name: Mapped[str]
@@ -68,17 +68,37 @@ class Template(BaseIdModel):
 class TicketsSet(BaseIdModel):
     __tablename__ = "tickets_set"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     author_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     template_id: Mapped[int] = mapped_column(ForeignKey(Template.id))
     name: Mapped[str]
     description: Mapped[str | None]
-    lua: Mapped[str | None]
     creation_timestamp: Mapped[datetime] = mapped_column(server_default=now())
+    log: Mapped[str | None]
 
     author: Mapped[User] = relationship()
     template: Mapped[Template] = relationship(back_populates="tickets_sets")
 
+    sources: Mapped[list["TicketsSetSource"]] = relationship()
+
     @property
     def s3_id(self) -> str:
-        return f"{self.author_id}/{self.id}"
+        return f"compiled/{self.id}"
+
+    @property
+    def filename(self) -> str:
+        return f"{self.name}.pdf"
+
+
+class TicketsSetSource(BaseIdModel):
+    __tablename__ = "tickets_set_source"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    tickets_set_id: Mapped[int] = mapped_column(ForeignKey(TicketsSet.id))
+    filename: Mapped[str]
+
+    tickets_set: Mapped[TicketsSet] = relationship(back_populates="sources")
+
+    @property
+    def s3_id(self) -> str:
+        return f"source/{self.id}/{self.filename}"

@@ -23,7 +23,6 @@ CREATE TABLE "tickets_set"(
     "template_id" int NOT NULL,
     "name" varchar NOT NULL,
     "description" text,
-    "lua" text,
     "log" text,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now())
 );
@@ -35,6 +34,12 @@ CREATE TABLE "workspace"(
     "description" text,
     "creation_timestamp" timestamp NOT NULL DEFAULT (now())
 );
+
+CREATE TABLE "tickets_set_source"(
+    "id" integer primary key generated always as identity,
+    "tickets_set_id" integer references public.tickets_set on delete cascade,
+    "filename" text not null
+)
 ALTER TABLE "template"
     ADD FOREIGN KEY ("author_id") REFERENCES "user"("id") ON DELETE SET NULL;
 ALTER TABLE "template"

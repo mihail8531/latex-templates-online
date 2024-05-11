@@ -5,7 +5,7 @@ import os
 from ..models import CompilationResult, Source
 from ..compiler import CompilerType
 from .texlive_compiler import TexliveCompiler
-from .exceptions import CompilationFailed
+from .exceptions import CompilationFailedError
 from utils import async_os_path_exists
 from io import BytesIO, StringIO
 
@@ -18,9 +18,9 @@ class TexliveLualatexCompiler(TexliveCompiler):
 
     async def compile(self, sources: Sequence[Source]) -> CompilationResult:
         async with aiofiles.tempfile.TemporaryDirectory() as tempdir:
-            main_tex_path = await self._prepare_enviroment(sources, cast(str, tempdir))
+            main_tex_path = await self._prepare_environment(sources, cast(str, tempdir))
             if main_tex_path is None:
-                raise CompilationFailed("main.tex not found")
+                raise CompilationFailedError("main.tex not found")
             with open(os.devnull, 'wb+') as devnull:
                 process = await asyncio.create_subprocess_shell(
                     " ".join(
@@ -31,7 +31,6 @@ class TexliveLualatexCompiler(TexliveCompiler):
                             "--interaction=nonstopmode",
                             "--shell-escape",
                             "--no-socket",
-                            "--safer",
                             "--output-format=pdf",
                             main_tex_path,
                         ]
@@ -50,10 +49,10 @@ class TexliveLualatexCompiler(TexliveCompiler):
             # if process.returncode != 0:
             #     raise CompilationFailed(output_log.read())
             if not await async_os_path_exists(output_pdf_file_path):
-                raise CompilationFailed(output_log.read())
+                raise CompilationFailedError(output_log.read())
             try:
                 async with aiofiles.open(output_pdf_file_path, "rb") as output_pdf_file:
                     output_file = BytesIO(await output_pdf_file.read())
             except OSError as e:
-                raise CompilationFailed(f"{e}\n{output_log.read()}")
+                raise CompilationFailedError(f"{e}\n{output_log.read()}")
         return CompilationResult(output_file=output_file, output_log=output_log)

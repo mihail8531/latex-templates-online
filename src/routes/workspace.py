@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends
+from pydantic import HttpUrl
+from fastapi import APIRouter, Depends, UploadFile
 from dependencies.template import (
     get_template,
     get_template_author_or_admin,
     get_template_service,
 )
+from dependencies.tickets_set import get_tickets_set_service
 from dependencies.user import get_logged_user, get_user, get_user_service
 from dependencies.workspace import (
     get_logged_user_in_workspace,
@@ -13,9 +15,10 @@ from dependencies.workspace import (
 )
 from models import public
 from schemas.template import TemplateCreate, TemplateHeader, Template
-from schemas.tickets_set import TicketsSetCreate
+from schemas.tickets_set import TicketsSet
 from schemas.workspace import Workspace, WorkspaceBase, WorkspaceCreate, WorkspaceHeader
 from services.template import TemplateService
+from services.tickets_set import TicketsSetService
 from services.user import UserNotFoundError, UserService
 from services.workspace import (
     OperationNotPermittedError,
@@ -46,10 +49,11 @@ async def create_workspace(
 
 @workspace_router.get("/list")
 async def get_workspaces(
-    user: public.User = Depends(get_logged_user_in_workspace),
+    user: public.User = Depends(get_logged_user),
     workspace_service: WorkspaceService = Depends(get_workspace_service),
 ) -> list[WorkspaceHeader]:
-    workspace_service.get_all_by_participant(user)
+    workspace_list = await workspace_service.get_all_by_participant(user)
+    return validate_ta(list[WorkspaceHeader], workspace_list)
 
 
 @workspace_router.get("/{workspace_id}")
@@ -88,7 +92,7 @@ async def add_user(
 @workspace_router.delete("/{workspace_id}/user/{user_id}")
 async def delete_user(
     user: public.User = Depends(get_workspace_admin),
-    user_to_delete: int = Depends(get_user),
+    user_to_delete: public.User = Depends(get_user),
     workspace: public.Workspace = Depends(get_workspace),
     workspace_service: WorkspaceService = Depends(get_workspace_service),
 ) -> None:
@@ -132,7 +136,7 @@ async def delete_template(
 
 @workspace_router.put("/{workspace_id}/template/{template_id}")
 async def update_template(
-    template_create: TemplateCreate, 
+    template_create: TemplateCreate,
     user: public.User = Depends(get_template_author_or_admin),
     template: public.Template = Depends(get_template),
     template_service: TemplateService = Depends(get_template_service),
@@ -140,11 +144,26 @@ async def update_template(
     await template_service.update_template(template, template_create)
     return TemplateHeader.model_validate(template, from_attributes=True)
 
+
 @workspace_router.post("/{workspace_id}/template/{template_id}/tickets_set")
 async def create_tickets_set(
-    tickets_set_create: TicketsSetCreate,
+    files: list[UploadFile],
+    name: str,
+    description: str | None = None,
     user: public.User = Depends(get_logged_user_in_workspace),
     template: public.Template = Depends(get_template),
-    tickets_set_service = Depends(get_tickets_set_service)
-)
-    
+    tickets_set_service: TicketsSetService = Depends(get_tickets_set_service),
+) -> TicketsSet:
+    tickets_set = await tickets_set_service.create(
+        files, name, description, template, user
+    )
+    pdf_url = await tickets_set_service.get_url(tickets_set)
+    return TicketsSet(
+        id=tickets_set.id,
+        name=tickets_set.name,
+        description=tickets_set.description,
+        author_id=tickets_set.author_id,
+        template_id=tickets_set.template_id,
+        creation_timestamp=tickets_set.creation_timestamp,
+        pdf_url=HttpUrl(pdf_url),
+    )

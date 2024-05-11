@@ -11,5 +11,11 @@ class TicketsSetRepository(AlchemyIdRepository[TicketsSet, int]):
 
 
 class TicketsSetFileRepository(S3Repository):
-    bucket_name = settings.BUCKET_NAME
-    url_expires_time = settings.URL_EXPIRES_TIME
+    bucket_name = settings.AWS_BUCKET_NAME
+    url_expires_time = settings.AWS_URL_EXPIRES_TIME
+
+
+class TicketsSetSourceFileRepository(S3Repository):
+    bucket_name = settings.AWS_BUCKET_NAME
+    url_expires_time = settings.AWS_URL_EXPIRES_TIME
+

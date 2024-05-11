@@ -16,7 +16,13 @@ RUN apt update && apt upgrade -y \
     gcc  \
     build-essential \
     dnsutils \
-    libpq-dev
+    libpq-dev \
+    texlive-full
+
+RUN echo "deb http://deb.debian.org/debian bookworm contrib non-free" > /etc/apt/sources.list.d/contrib.list
+RUN apt-get update && apt-get upgrade
+RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
+RUN apt-get install -y ttf-mscorefonts-installer
 
 RUN pip install -U pip && pip install poetry
 

@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from io import BytesIO, StringIO
+from typing import IO
 
 
 @dataclass
 class Source:
     filename: str
-    source_file: StringIO
+    file: IO[bytes]
 
 
 @dataclass
