@@ -32,6 +32,7 @@ class S3Settings(BaseSettings):
     AWS_REGION_NAME: str | None = None
     AWS_ENDPOINT_PORT: str | None = None
     AWS_ENDPOINT_HOST: str | None = None
+    AWS_OUTER_ENDPOINT_HOST: str | None = None
 
     @property
     def AWS_ENDPOINT_URL(self) -> str | None:

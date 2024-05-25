@@ -1,11 +1,14 @@
 from pydantic import HttpUrl
 from fastapi import APIRouter, Depends, UploadFile
 from dependencies.template import (
-    get_template,
+    get_template_dep,
     get_template_author_or_admin,
     get_template_service,
 )
-from dependencies.tickets_set import get_tickets_set_service
+from dependencies.tickets_set import (
+    get_tickets_set_service,
+    get_tickets_set as get_tickets_set_dep,
+)
 from dependencies.user import get_logged_user, get_user, get_user_service
 from dependencies.workspace import (
     get_logged_user_in_workspace,
@@ -15,7 +18,7 @@ from dependencies.workspace import (
 )
 from models import public
 from schemas.template import TemplateCreate, TemplateHeader, Template
-from schemas.tickets_set import TicketsSet
+from schemas.tickets_set import TicketsSet, TicketsSetHeader
 from schemas.workspace import Workspace, WorkspaceBase, WorkspaceCreate, WorkspaceHeader
 from services.template import TemplateService
 from services.tickets_set import TicketsSetService
@@ -114,6 +117,16 @@ async def add_template(
     return TemplateHeader.model_validate(template, from_attributes=True)
 
 
+@workspace_router.get("/{workspace_id}/template/{template_id}")
+async def get_template(
+    template: public.Template = Depends(get_template_dep),
+    user: public.User = Depends(get_logged_user_in_workspace),
+    workspace_service: WorkspaceService = Depends(get_workspace_service),
+) -> Template:
+    template = await workspace_service.get_template(template)
+    return Template.model_validate(template, from_attributes=True)
+
+
 @workspace_router.get("/{workspace_id}/templates")
 async def get_templates_list(
     user: public.User = Depends(get_logged_user_in_workspace),
@@ -128,7 +141,7 @@ async def get_templates_list(
 @workspace_router.delete("/{workspace_id}/template/{template_id}")
 async def delete_template(
     user: public.User = Depends(get_template_author_or_admin),
-    template: public.Template = Depends(get_template),
+    template: public.Template = Depends(get_template_dep),
     template_service: TemplateService = Depends(get_template_service),
 ) -> None:
     await template_service.delete_template(template)
@@ -138,7 +151,7 @@ async def delete_template(
 async def update_template(
     template_create: TemplateCreate,
     user: public.User = Depends(get_template_author_or_admin),
-    template: public.Template = Depends(get_template),
+    template: public.Template = Depends(get_template_dep),
     template_service: TemplateService = Depends(get_template_service),
 ) -> TemplateHeader:
     await template_service.update_template(template, template_create)
@@ -151,19 +164,37 @@ async def create_tickets_set(
     name: str,
     description: str | None = None,
     user: public.User = Depends(get_logged_user_in_workspace),
-    template: public.Template = Depends(get_template),
+    template: public.Template = Depends(get_template_dep),
     tickets_set_service: TicketsSetService = Depends(get_tickets_set_service),
 ) -> TicketsSet:
     tickets_set = await tickets_set_service.create(
         files, name, description, template, user
     )
-    pdf_url = await tickets_set_service.get_url(tickets_set)
-    return TicketsSet(
-        id=tickets_set.id,
-        name=tickets_set.name,
-        description=tickets_set.description,
-        author_id=tickets_set.author_id,
-        template_id=tickets_set.template_id,
-        creation_timestamp=tickets_set.creation_timestamp,
-        pdf_url=HttpUrl(pdf_url),
-    )
+    return await tickets_set_service.get_tickets_set_full(tickets_set)
+
+# @workspace_router.patch("/{workspace_id}/template/{template_id}/tickets_set")
+# async def update_tickets_set(
+#     files: list[UploadFile],
+#     name: str,
+#     description: str | None = None,
+#     user: public.User = Depends(get_logged_user_in_workspace),
+#     template: public.Template = Depends(get_template_dep),
+#     tickets_set_service: TicketsSetService = Depends(get_tickets_set_service),
+# ) -> TicketsSet:
+#     tickets_set = await tickets_set_service.update(
+#         files, name, description, template, user
+#     )
+#     return await tickets_set_service.get_tickets_set_full(tickets_set)
+
+
+@workspace_router.get(
+    "/{workspace_id}/template/{template_id}/tickets_set/{tickets_set_id}"
+)
+async def get_tickets_set(
+    tickets_set: public.TicketsSet = Depends(get_tickets_set_dep),
+    user: public.User = Depends(get_logged_user_in_workspace),
+    template: public.Template = Depends(get_template_dep),
+    tickets_set_service: TicketsSetService = Depends(get_tickets_set_service),
+) -> TicketsSet:
+    return await tickets_set_service.get_tickets_set_full(tickets_set)
+

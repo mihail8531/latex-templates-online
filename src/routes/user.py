@@ -2,10 +2,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from dependencies.user import get_auth_service, get_logged_user, get_user_service
-from exceptions.user import user_already_exists
+from exceptions.user import user_already_exists, user_not_found
 from models import public
 from services.auth import AuthService
-from services.user import UserAlreadyExistsError, UserService
+from services.user import UserAlreadyExistsError, UserNotFoundError, UserService
 from schemas.user import UserCreate, UserHeader
 
 user_router = APIRouter(prefix="/user")
@@ -39,5 +39,15 @@ async def create_user(
         raise user_already_exists
     return UserHeader.model_validate(user, from_attributes=True)
 
-# @user_router.get("/workspaces")
-# async def get_workspaces()
+
+@user_router.get("/")
+async def get_user(
+    login: str,
+    current_user: public.User = Depends(get_logged_user),
+    user_service: UserService = Depends(get_user_service),
+) -> UserHeader:
+    try:
+        user = await user_service.get_by_login(login)
+    except UserNotFoundError:
+        raise user_not_found
+    return UserHeader.model_validate(user, from_attributes=True)

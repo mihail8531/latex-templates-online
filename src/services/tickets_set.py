@@ -8,6 +8,7 @@ from repositories.tickets_set import (
     TicketsSetRepository,
     TicketsSetSourceFileRepository,
 )
+from schemas.tickets_set import TicketsSet, TicketsSetSource
 from services.compiler.compiler import CompilerType, CompilersStorage
 from services.compiler.models import Source
 from services.compiler.texlive_compilers.exceptions import CompilationFailedError
@@ -22,6 +23,10 @@ class TicketsSetFileNotFoundError(TicketsSetServiceError):
 
 
 class CompilationError(TicketsSetServiceError):
+    pass
+
+
+class TicketsSetNotFoundError(TicketsSetServiceError):
     pass
 
 
@@ -40,7 +45,7 @@ class TicketsSetService:
 
     async def get_url(self, tickets_set: public.TicketsSet) -> str:
         url = await self._tickets_set_file_repository.get_download_url(
-            tickets_set.s3_id, tickets_set.filename
+            tickets_set.s3_id, tickets_set.filename, pdf_show=True
         )
         if url is None:
             raise TicketsSetFileNotFoundError("File not found")
@@ -76,6 +81,8 @@ class TicketsSetService:
             )
         except CompilationFailedError:
             raise ValueError(str(template.latex))
+        for source_file in source_files:
+            source_file.file.seek(0)
         tickets_set = public.TicketsSet(
             author_id=user.id,
             template_id=template.id,
@@ -87,13 +94,71 @@ class TicketsSetService:
                 for source in source_files
             ],
         )
+        filename_map = {source.filename: source for source in source_files}
         await self._tickets_set_repository.add(tickets_set)
         await self._tickets_set_file_repository.add(
             File(id=tickets_set.s3_id, data=compilation_result.output_file)
         )
+        await tickets_set.awaitable_attrs.sources
+        for source in tickets_set.sources:
+            await self._tickets_set_source_file_repository.add(
+                File(
+                    id=source.s3_id,
+                    data=BytesIO(filename_map[source.filename].file.read()),
+                )
+            )
         return tickets_set
 
     async def delete(self, tickets_set: public.TicketsSet) -> None:
         s3_id = tickets_set.s3_id
         await self._tickets_set_repository.delete(tickets_set)
         await self._tickets_set_file_repository.delete(File(id=s3_id, data=BytesIO()))
+
+    async def get_tickets_set(self, tickets_set_id: int) -> public.TicketsSet:
+        tickets_set = await self._tickets_set_repository.get(tickets_set_id)
+        if tickets_set is None:
+            raise TicketsSetNotFoundError()
+        return tickets_set
+
+    async def get_tickets_set_full(self, tickets_set: public.TicketsSet) -> TicketsSet:
+        sources_list = await self._tickets_set_repository.get_sources_list(tickets_set)
+        for i, source in enumerate(sources_list):
+            if source.filename.endswith(".lua"):
+                additional_sources = sources_list[:i] + sources_list[i + 1 :]
+                lua_source = sources_list[i]
+                break
+        else:
+            additional_sources = sources_list
+            lua_source = None
+        additional_sources_schemas = [
+            TicketsSetSource(
+                filename=s.filename,
+                url=await self._tickets_set_source_file_repository.get_download_url(  # type: ignore[arg-type]
+                    s.s3_id, s.filename
+                ),
+            )
+            for s in additional_sources
+        ]
+        return TicketsSet(
+            name=tickets_set.name,
+            description=tickets_set.description,
+            id=tickets_set.id,
+            author_id=tickets_set.author_id,
+            template_id=tickets_set.template_id,
+            creation_timestamp=tickets_set.creation_timestamp,
+            pdf_url=await self._tickets_set_file_repository.get_download_url(  # type: ignore[arg-type]
+                tickets_set.s3_id, tickets_set.filename, pdf_show=True
+            ),
+            lua=(
+                None
+                if lua_source is None
+                else str(
+                    (
+                        await self._tickets_set_source_file_repository.get(  # type: ignore[union-attr]
+                            lua_source.s3_id
+                        )
+                    ).data.read().decode()
+                )
+            ),
+            additional_sources=additional_sources_schemas,
+        )

@@ -33,7 +33,7 @@ services:
       - minio
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./AppDockerfile
     env_file:
       - .env.docker
     ports:

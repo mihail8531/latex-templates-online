@@ -25,3 +25,4 @@ async def get_token(
     except (InvalidPasswordError, InvalidUsernameError):
         raise credentials_exception
     return await auth_service.get_token(user.id)
+

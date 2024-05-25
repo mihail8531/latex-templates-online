@@ -25,12 +25,3 @@ RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula selec
 RUN apt-get install -y ttf-mscorefonts-installer
 
 RUN pip install -U pip && pip install poetry
-
-COPY pyproject.toml poetry.lock ./
-
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root --only main
-
-COPY src /app/
-
-ENTRYPOINT ["python", "main.py"]

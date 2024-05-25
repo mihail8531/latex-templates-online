@@ -21,7 +21,7 @@ def get_template_service(
     return TemplateService(template_repository)
 
 
-async def get_template(
+async def get_template_dep(
     template_id: int,
     user: public.User = Depends(get_logged_user_in_workspace),
     template_service: TemplateService = Depends(get_template_service),
@@ -32,14 +32,14 @@ async def get_template(
     except TemplateNotFound:
         raise template_not_found
     if not workspace_service.have_template(template):
-        raise template_service
+        raise template_not_found
     return template
 
 
 def get_template_author_or_admin(
     user: public.User = Depends(get_logged_user_in_workspace),
     workspace: public.Workspace = Depends(get_workspace),
-    template: public.Template = Depends(get_template),
+    template: public.Template = Depends(get_template_dep),
     template_service: TemplateService = Depends(get_template_service),
     workspace_service: WorkspaceService = Depends(get_workspace_service),
 ) -> public.User:

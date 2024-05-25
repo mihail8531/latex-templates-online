@@ -1,5 +1,6 @@
 from fastapi import Depends
 from repositories.dependencies import get_alchemy_repository
+from repositories.template import TemplateRepository
 from repositories.workspace import WorkspaceRepository
 from services.workspace import (
     OperationNotPermittedError,
@@ -15,8 +16,11 @@ def get_workspace_service(
     workspace_repository: WorkspaceRepository = Depends(
         get_alchemy_repository(WorkspaceRepository)
     ),
+    template_repository: TemplateRepository = Depends(
+        get_alchemy_repository(TemplateRepository)
+    ),
 ) -> WorkspaceService:
-    return WorkspaceService(workspace_repository)
+    return WorkspaceService(workspace_repository, template_repository)
 
 
 async def get_workspace(
@@ -48,4 +52,3 @@ async def get_workspace_admin(
     if not workspace_service.is_user_admin(workspace, user):
         raise operation_not_permitted
     return user
-

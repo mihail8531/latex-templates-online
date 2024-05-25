@@ -30,8 +30,10 @@ class WorkspaceService:
     def __init__(
         self,
         workspace_repository: WorkspaceRepository,
+        template_repository: TemplateRepository,
     ) -> None:
         self._workspace_repository = workspace_repository
+        self._template_repository = template_repository
 
     async def create(
         self, workspace_create: WorkspaceCreate, creator: public.User
@@ -110,3 +112,6 @@ class WorkspaceService:
 
     def is_user_admin(self, workspace: public.Workspace, user: public.User) -> bool:
         return workspace.admin_id == user.id
+
+    async def get_template(self, template: public.Template) -> public.Template:
+        return await self._template_repository.get_full(template)
